@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Jogo da Memória - Belz Conecta</title>
+  <link rel="preload" href="style.css" as="style" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="logo.png" />
+</head>
+<body>
+  <main id="app">
+    <!-- Tela inicial -->
+    <section id="start-screen" class="screen active" aria-labelledby="titulo-inicial">
+      <div class="logo-wrapper fade-in">
+        <img src="logo.png" alt="Logo da Empresa" class="logo" draggable="false" />
+      </div>
+      <h1 id="titulo-inicial" class="visually-hidden">Jogo da Memória Belz Conecta</h1>
+      <button id="start-btn" class="btn primary pulse" aria-label="Iniciar jogo">Jogar</button>
+    </section>
+
+    <!-- Tela do jogo -->
+    <section id="game-screen" class="screen" aria-live="polite" aria-label="Área do jogo">
+      <header class="top-bar">
+        <div class="timer-wrapper" aria-label="Cronômetro">
+          <span class="icon" aria-hidden="true">⏱️</span>
+          <span id="timer" class="timer-text">Tempo: 60</span>
+        </div>
+        <div class="status" id="pairs-status" aria-label="Pares encontrados"></div>
+      </header>
+      <div id="game-board" class="game-board" role="grid" aria-label="Cartas do jogo"></div>
+    </section>
+
+    <!-- Tela final -->
+    <section id="end-screen" class="screen" aria-labelledby="end-message">
+      <div class="end-box slide-up">
+        <h2 id="end-message" class="end-message"></h2>
+        <div class="stats" id="final-stats"></div>
+        <button id="restart-btn" class="btn secondary" aria-label="Jogar novamente">Jogar Novamente</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Overlay de transição -->
+  <div id="transition-overlay" class="overlay hidden"></div>
+  <!-- Tela de carregamento -->
+  <div id="loading-screen" class="loading hidden" aria-live="polite">
+    <div class="loader"></div>
+    <p class="loading-text">Carregando imagens...</p>
+  </div>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
