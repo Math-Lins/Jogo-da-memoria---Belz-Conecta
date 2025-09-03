@@ -414,3 +414,68 @@ restartBtn.addEventListener('click', scrollTopoSeguro);
 // Escala fixa removida; layout agora é fluido.
 // Escala do "palco" 1920x1080 (restaurada)
 // Escala removida: tela 2 agora independente e fluida.
+
+// =============================
+// MODO TOTEM / KIOSK (ANDROID)
+// =============================
+// 1. Wake Lock para manter a tela ligada (quando suportado)
+let wakeLock = null;
+async function requisitarWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => { console.log('WakeLock liberado'); });
+    }
+  } catch (e) { console.warn('Falha wakeLock', e); }
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    requisitarWakeLock();
+  }
+});
+requisitarWakeLock();
+
+// 2. Prevenir zoom por gesto (duplo toque / pinch) em contexto totem
+let ultimoToque = 0;
+document.addEventListener('touchend', (e) => {
+  const agora = Date.now();
+  if (agora - ultimoToque < 350) {
+    e.preventDefault();
+  }
+  ultimoToque = agora;
+}, { passive:false });
+document.addEventListener('gesturestart', e => e.preventDefault());
+
+// 3. Reset completo após longo período sem interação (ex: alguém abandona a sessão)
+let resetGlobalTimeout = null;
+function agendarResetGlobal() {
+  clearTimeout(resetGlobalTimeout);
+  resetGlobalTimeout = setTimeout(() => {
+    // Volta à tela inicial se estiver em jogo ou tela final
+    if (!startScreen.classList.contains('active')) {
+      clearInterval(intervaloTempo);
+      mostrarTela(startScreen);
+      gameBoard.innerHTML = '';
+      aplicarDificuldade();
+    }
+  }, 5 * 60 * 1000); // 5 minutos
+}
+['click','touchstart','keydown'].forEach(evt => document.addEventListener(evt, agendarResetGlobal, {passive:true}));
+agendarResetGlobal();
+
+// 4. Força rolar topo ao voltar a ficar visível (Android a vezes desloca viewport)
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    setTimeout(()=> window.scrollTo(0,0), 60);
+  }
+});
+
+// 5. Aviso (console) sobre orientação — se altura muito baixa sugere rotacionar
+function checarOrientacao() {
+  if (window.innerHeight < 420 && window.innerWidth > window.innerHeight) {
+    console.log('Sugestão: Rotacione o dispositivo para melhor experiência.');
+  }
+}
+window.addEventListener('resize', checarOrientacao);
+checarOrientacao();
+

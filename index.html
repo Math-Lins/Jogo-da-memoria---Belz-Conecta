@@ -3,10 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Jogo da Memória - Belz Conecta</title>
+  <meta name="theme-color" content="#011147" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="format-detection" content="telephone=no" />
   <link rel="preload" href="style.css" as="style" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.webmanifest" />
   <!-- Fontes estilo jogo -->
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
   <link href="https://fonts.cdnfonts.com/css/game-over" rel="stylesheet" />
@@ -18,9 +24,9 @@
   <section id="start-screen" class="screen active" aria-labelledby="titulo-inicial">
       <div class="start-panel" role="group" aria-describedby="descricao-jogo">
   <h1 id="titulo-inicial" class="game-title" aria-label="Jogo da Memória Belz Conecta">
-             <span class="brand-belz" aria-hidden="true">JOGO DA MEMORIA</span>
+             <span class="brand-belz" aria-hidden="true">JOGO DA MEMÓRIA</span>
           </h1>
-        <p id="descricao-jogo" class="tagline">Encontre todos os pares antes que o tempo acabe.</p>
+        <p id="descricao-jogo" class="tagline">Encontre todos os pares antes que o tempo acabe! </p>
         <div class="options-row">
           <div class="field">
             <label for="difficulty-select">Dificuldade</label>
@@ -82,5 +88,13 @@
   </div>
 
   <script src="script.js" defer></script>
+  <script defer>
+    // Registro do Service Worker para funcionamento offline no totem
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(e=>console.warn('SW falhou', e));
+      });
+    }
+  </script>
 </body>
 </html>

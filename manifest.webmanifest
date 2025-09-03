@@ -1,0 +1,33 @@
+{
+  "name": "Jogo da Memória - Belz Conecta",
+  "short_name": "Memória Belz",
+  "description": "Jogo da Memória corporativo para totem do evento Belz Conecta.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "background_color": "#011147",
+  "theme_color": "#011147",
+  "orientation": "any",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "categories": ["games", "education"],
+  "icons": [
+    { "src": "img/img2.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "img/img2.png", "sizes": "256x256", "type": "image/png", "purpose": "any" },
+    { "src": "img/img2.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Iniciar Jogo Médio",
+      "short_name": "Médio",
+      "url": "./index.html#start-medio",
+      "description": "Abrir já focado na dificuldade média"
+    },
+    {
+      "name": "Iniciar Jogo Fácil",
+      "short_name": "Fácil",
+      "url": "./index.html#start-facil"
+    }
+  ],
+  "prefer_related_applications": false
+}
