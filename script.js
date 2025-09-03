@@ -13,8 +13,10 @@ const gameBoard = document.getElementById('game-board');
 const timerElement = document.getElementById('timer');
 const endMessage = document.getElementById('end-message');
 const startBtn = document.getElementById('start-btn');
+const difficultySelect = document.getElementById('difficulty-select');
 const restartBtn = document.getElementById('restart-btn');
 const homeBtn = document.getElementById('home-btn');
+const endBtn = document.getElementById('end-btn');
 const pairsStatus = document.getElementById('pairs-status');
 const finalStats = document.getElementById('final-stats');
 const overlay = document.getElementById('transition-overlay');
@@ -24,15 +26,16 @@ const EXT_VARIANTS = ['.png', '.jpg', '.jpeg', '.webp'];
 
 // ---- Configuração do jogo ----
 const CONFIG = {
-  tempoTotal: 45,        // segundos (45s)
-  colunas: 4,            // 4 colunas x 3 linhas = 12 cartas
-  linhas: 3,             // referência
+  tempoTotal: 60,        // segundos (60s)
+  colunas: 5,            // 5 colunas x 4 linhas = 20 cartas
+  linhas: 4,             // referência
   embaralharSeed: null,  // reservado para futura seed
   caminhoImagens: 'img/',
-  // 6 imagens únicas => 6 pares => 12 cartas (cada nome gera 2 cartas)
+  // Ainda só temos 6 arquivos físicos; vamos gerar placeholders para completar até 10 pares.
   imagens: [
     'img1.png','img2.png','img3.png','img4.png','img5.png','img6.png'
   ],
+  gerarPlaceholders: true, // permite criar imagens sintéticas para pares extras
   // Configurações de aparência:
   usarVersoUnico: false,          // true = todos os versos iguais (usa imagem abaixo)
   imagemVersoUnico: 'img2.png'     // usada se usarVersoUnico = true
@@ -40,6 +43,7 @@ const CONFIG = {
 
 // Vetor expandido (pares) será construído dinamicamente.
 let deck = [];
+const PLACEHOLDER_CACHE = {}; // armazena dataURLs gerados
 
 // Estado de jogo
 let primeiro = null;      // {el, id}
@@ -52,9 +56,17 @@ let inicioTimestamp = null;
 
 // ---- Funções Utilitárias ----
 function shuffle(array) {
-  // Implementação Fisher-Yates para embaralhamento uniforme
+  // Fisher-Yates com fonte de entropia crypto quando disponível
+  const rng = (max) => {
+    if (window.crypto && crypto.getRandomValues) {
+      const buf = new Uint32Array(1);
+      crypto.getRandomValues(buf);
+      return buf[0] % (max + 1);
+    }
+    return Math.floor(Math.random() * (max + 1));
+  };
   for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = rng(i);
     [array[i], array[j]] = [array[j], array[i]];
   }
   return array;
@@ -80,6 +92,42 @@ function atualizarParesStatus() {
   pairsStatus.textContent = `${paresEncontrados}/${total} pares`;
 }
 
+function obterDataURLPlaceholder(chave) {
+  if (PLACEHOLDER_CACHE[chave]) return PLACEHOLDER_CACHE[chave];
+  const canvas = document.createElement('canvas');
+  canvas.width = 256; canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+  const idx = parseInt(chave.replace('__auto',''),10) || 0;
+  const cores = ['#0b3c68','#145d99','#1e7fc8','#2696e8','#34b2ff','#0d2f4e'];
+  const c1 = cores[idx % cores.length];
+  const c2 = cores[(idx+2) % cores.length];
+  const grad = ctx.createLinearGradient(0,0,256,256);
+  grad.addColorStop(0,c1); grad.addColorStop(1,c2);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,256,256);
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  for (let i=0;i<8;i++) {
+    ctx.beginPath();
+    ctx.arc(Math.random()*256, Math.random()*256, 20+Math.random()*40, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 120px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(String(idx+1),128,140);
+  const url = canvas.toDataURL('image/png');
+  PLACEHOLDER_CACHE[chave] = url;
+  return url;
+}
+
+function resolverSrcImagem(nome) {
+  if (!nome) return '';
+  if (nome.startsWith('data:image')) return nome;
+  if (nome.startsWith('__auto')) return obterDataURLPlaceholder(nome);
+  return CONFIG.caminhoImagens + nome;
+}
+
 function criarCarta(idImagem, idxGlobal) {
   const carta = document.createElement('div');
   carta.className = 'card';
@@ -90,10 +138,11 @@ function criarCarta(idImagem, idxGlobal) {
   carta.dataset.index = idxGlobal;
   // Define qual imagem irá no verso (face revelada)
   const imgVerso = CONFIG.usarVersoUnico ? CONFIG.imagemVersoUnico : idImagem;
+  const srcFinal = resolverSrcImagem(imgVerso);
   carta.innerHTML = `
     <div class="card-inner">
-      <div class="card-face card-front"></div>
-      <div class="card-face card-back"><img src="${CONFIG.caminhoImagens + imgVerso}" alt="Imagem corporativa" draggable="false" onerror="this.dataset.err=1;this.style.opacity=.1;this.parentElement.style.background='linear-gradient(145deg,#082541,#0f3f66)';this.parentElement.style.display='flex';this.parentElement.style.alignItems='center';this.parentElement.style.justifyContent='center';this.parentElement.style.fontWeight='600';this.parentElement.style.letterSpacing='1px';this.parentElement.style.color='#3ad4ff';this.parentElement.textContent='IMG';" /></div>
+  <div class="card-face card-front"><img class="front-logo" src="img/cardfront.jpg" alt="" draggable="false" onerror="this.style.display='none'" /></div>
+      <div class="card-face card-back"><img src="${srcFinal}" alt="Imagem corporativa" draggable="false" onerror="this.dataset.err=1;this.style.opacity=.1;this.parentElement.style.background='linear-gradient(145deg,#082541,#0f3f66)';this.parentElement.style.display='flex';this.parentElement.style.alignItems='center';this.parentElement.style.justifyContent='center';this.parentElement.style.fontWeight='600';this.parentElement.style.letterSpacing='1px';this.parentElement.style.color='#3ad4ff';this.parentElement.textContent='IMG';" /></div>
     </div>
   `;
   carta.addEventListener('click', () => virarCarta(carta));
@@ -138,8 +187,15 @@ function reiniciarEstado() {
 }
 
 function construirDeck() {
-  // Duplicar a lista base para criar pares
-  const base = [...CONFIG.imagens];
+  const paresNecessarios = (CONFIG.colunas * CONFIG.linhas) / 2;
+  let base = [...CONFIG.imagens];
+  if (base.length < paresNecessarios && CONFIG.gerarPlaceholders) {
+    const faltam = paresNecessarios - base.length;
+    for (let i = 0; i < faltam; i++) {
+      base.push(`__auto${i}`);
+    }
+  }
+  base = base.slice(0, paresNecessarios); // garante tamanho exato
   deck = shuffle([...base, ...base]);
 }
 
@@ -220,9 +276,9 @@ function encerrarJogo(venceu) {
   setTimeout(() => {
   mostrarTela(endScreen);
     if (venceu) {
-      endMessage.textContent = '🎉 Parabéns! Você concluiu em menos de 1 minuto!';
+      endMessage.textContent = '🎉 Parabéns! Você concluiu o jogo!';
     } else {
-      endMessage.textContent = '😅 Tente novamente!';
+      endMessage.textContent = '😅Tente novamente!';
     }
     const usados = CONFIG.tempoTotal - tempoRestante;
     const segundosFormat = usados + 's';
@@ -237,7 +293,6 @@ function mostrarTela(target) {
   // Ajusta modo de layout para tela de jogo ocupar 1920x1080 quando possível
   if (target === gameScreen) {
     document.body.classList.add('game-mode');
-  ajustarEscalaStage();
   } else {
     document.body.classList.remove('game-mode');
   }
@@ -253,6 +308,34 @@ homeBtn && homeBtn.addEventListener('click', () => {
   gameBoard.innerHTML = '';
   timerElement.textContent = 'Tempo: ' + formatarSegundos(CONFIG.tempoTotal);
 });
+
+// Encerrar jogo manualmente (tratado como desistência)
+endBtn && endBtn.addEventListener('click', () => {
+  if (!gameScreen.classList.contains('active')) return;
+  encerrarJogo(false);
+});
+
+
+// Dificuldades
+const MAPA_DIFICULDADE = {
+  facil:  { colunas:4, linhas:3, tempo:45 },
+  medio:  { colunas:5, linhas:4, tempo:60 },
+  dificil:{ colunas:6, linhas:5, tempo:90 }
+};
+
+function aplicarDificuldade() {
+  if (!difficultySelect) return;
+  const val = difficultySelect.value;
+  const def = MAPA_DIFICULDADE[val] || MAPA_DIFICULDADE.medio;
+  CONFIG.colunas = def.colunas;
+  CONFIG.linhas = def.linhas;
+  CONFIG.tempoTotal = def.tempo;
+  tempoRestante = CONFIG.tempoTotal;
+  timerElement.textContent = 'Tempo: ' + formatarSegundos(CONFIG.tempoTotal);
+}
+
+difficultySelect && difficultySelect.addEventListener('change', aplicarDificuldade);
+aplicarDificuldade();
 
 // Permite reiniciar automaticamente após inatividade na tela final (kiosk opcional)
 let idleTimeout = null;
@@ -322,22 +405,4 @@ restartBtn.addEventListener('click', scrollTopoSeguro);
 
 // Escala fixa removida; layout agora é fluido.
 // Escala do "palco" 1920x1080 (restaurada)
-function ajustarEscalaStage() {
-  const stage = document.querySelector('#game-screen .stage');
-  if (!stage) return;
-  const BASE_W = 1920;
-  const BASE_H = 1080;
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-  // Usa MAX para preencher toda a tela (sem barras), cortando excedente se necessário
-  const escala = Math.max(vw / BASE_W, vh / BASE_H);
-  stage.style.transform = `translate(-50%, -50%) scale(${escala})`;
-  stage.style.position = 'absolute';
-  stage.style.top = '50%';
-  stage.style.left = '50%';
-  stage.style.width = BASE_W + 'px';
-  stage.style.height = BASE_H + 'px';
-  stage.style.overflow = 'hidden';
-}
-window.addEventListener('load', ajustarEscalaStage);
-window.addEventListener('resize', ajustarEscalaStage);
+// Escala removida: tela 2 agora independente e fluida.

@@ -14,6 +14,11 @@ body {
 :root {
   --primary: #00b4ff;
   --primary-accent: #3ad4ff;
+   /* Cores da Belz (marca) */
+   --brand: #011147;
+   --brand-accent: #02306a;
+   --brand-accent2: #0456b1;
+   --brand-glow: #3ad4ff;
   --bg-panel: rgba(255,255,255,0.06);
   --bg-panel-alt: rgba(255,255,255,0.12);
   --success: #2ecc71;
@@ -40,9 +45,9 @@ body, button { font-size: clamp(16px, 2.1vh, 22px); }
 
 main#app { width:100%; max-width:1400px; height:100%; display:flex; align-items:center; justify-content:center; position:relative; }
 /* Modo jogo tela cheia */
-body.game-mode main#app { max-width:none; width:100vw; height:100dvh; }
-body.game-mode { align-items:stretch; }
-body.game-mode #game-screen { min-height:100dvh; width:100%; display:flex; flex-direction:column; }
+body.game-mode { display:block !important; justify-content:unset !important; align-items:unset !important; }
+body.game-mode main#app { max-width:none !important; width:100vw !important; height:100dvh !important; margin:0 !important; padding:0 !important; display:block !important; position:static !important; }
+body.game-mode #game-screen { position:absolute; inset:0; min-height:100dvh; width:100vw; display:flex; flex-direction:column; margin:0; }
 body.game-mode .top-bar { max-width: min(1800px, 92vw); }
 body.game-mode #game-board { margin-left:auto; margin-right:auto; max-width: min(1600px, 90vw); }
 
@@ -51,6 +56,11 @@ body.game-mode #game-board { margin-left:auto; margin-right:auto; max-width: min
    ========================== */
 .screen { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; padding: clamp(16px, 4vw, 60px); text-align:center; animation: fadeOut .5s both; }
 #game-screen { justify-content:flex-start; padding-top: clamp(70px, env(safe-area-inset-top, 0px) + 80px, 140px); }
+
+/* Overrides para eliminar deslocamento na tela 2 (refinado) */
+body.game-mode #game-screen { padding:0 !important; }
+body.game-mode #game-screen .stage { left:0 !important; right:0 !important; top:0 !important; justify-content:flex-start; padding-top: clamp(70px, env(safe-area-inset-top,0px) + 60px, 120px); }
+body.game-mode #game-screen .top-bar { position:relative; top:0; margin:0 auto clamp(12px,1.5vh,24px); }
 .screen.active { display:flex; animation: fadeIn .6s both; }
 
 /* Tela inicial com imagem de fundo */
@@ -64,6 +74,118 @@ body.game-mode #game-board { margin-left:auto; margin-right:auto; max-width: min
    justify-content:center;
    align-items:center;
 }
+#start-screen .start-panel {
+   background:transparent; /* painel invisível */
+   backdrop-filter:none;
+   -webkit-backdrop-filter:none;
+    padding: 40px 48px; /* ajuste manual para caber dentro de 703x1021 */
+    border-radius: 36px;
+   box-shadow:none; /* remove sombra */
+    width:703px; /* largura fixa solicitada */
+    height:1021px; /* altura fixa solicitada */
+   display:flex; flex-direction:column; gap: 32px; justify-content:center; /* centraliza vertical */
+    align-items:center; text-align:center;
+    box-sizing:border-box;
+   margin-top:125px; /* desloca 50px para baixo */
+   margin-right: 80px; /* ajuste manual para caber dentro de 703x1021 */
+   margin-left: 48px; /* ajuste manual para caber dentro de 703x1021 */
+}
+/* Fonte estilo jogo aplicada a todo o painel inicial */
+#start-screen .start-panel, 
+#start-screen .start-panel *:not(.blob):not(.blob *):not(.card) {
+   font-family: 'Press Start 2P','Game Over',monospace !important;
+   letter-spacing: 1px;
+}
+/* Ajustes de legibilidade específicos */
+#start-screen .start-panel .tagline { letter-spacing:1.5px; line-height:1.5; }
+#start-screen .start-panel label { letter-spacing:2px; }
+#start-screen .start-panel .howto-inline { letter-spacing:1.2px; }
+/* Shift global de 30px para baixo em todos os elementos internos do painel */
+#start-screen .start-panel > * { transform: translateY(30px); }
+/* Escala o painel em telas menores para evitar overflow extremo */
+@media (max-width:760px), (max-height:1100px) {
+   #start-screen .start-panel { width:703px; height:1021px; transform: scale(calc(min(100vw/703, (100dvh-40px)/1021))); transform-origin:center center; }
+}
+.game-title {
+   font-size: clamp(42px,8.5vmin,96px);
+   line-height:1;
+   margin: -10px 0 20px 0;
+  letter-spacing:2px;
+  font-weight:800;
+  position:relative;
+  overflow:hidden;
+  display:inline-block;
+  background: linear-gradient(120deg,#011147 0%, #02306a 30%, #0456b1 55%, #3ad4ff 70%, #011147 90%);
+  background-size:260% 100%;
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  text-shadow: 0 2px 6px rgba(0,0,0,.35);
+  animation: titleReveal .8s cubic-bezier(.23,1.12,.52,1) .05s both, gradientMove 12s ease-in-out 1s infinite, glowSoft 7s ease-in-out 1.2s infinite;
+}
+.start-panel .tagline,
+.start-panel .howto-inline,
+.start-panel label,
+.start-panel .field select { color:#011147 !important; text-shadow:none; }
+.start-panel .howto-inline { opacity:1; }
+/* Override específico para o seletor de dificuldade: texto branco e maior */
+.start-panel .field select {
+   color:#fff !important;
+   background:#011d3c !important;
+   font-size:18px !important;
+   font-weight:600;
+   padding:14px 24px !important;
+   min-width:240px;
+   border:2px solid #023f73 !important;
+   border-radius:18px !important;
+   box-shadow:0 4px 14px -4px rgba(0,0,0,.55), 0 0 0 2px rgba(255,255,255,.06) inset;
+}
+.start-panel .field select:focus { outline:none; border-color:#3ad4ff !important; box-shadow:0 0 0 3px rgba(0,180,255,.3), 0 4px 14px -4px rgba(0,0,0,.55); }
+/* Desativa brilho animado do título para ficar mais sóbrio sobre fundo claro */
+@media (prefers-reduced-motion: no-preference) {
+   .game-title::after { opacity:.4; }
+}
+.game-title::after {
+  content:""; position:absolute; inset:0; pointer-events:none; mix-blend-mode:screen; opacity:.35;
+  background: linear-gradient(115deg, rgba(255,255,255,0) 38%, rgba(255,255,255,.75) 50%, rgba(255,255,255,0) 62%);
+  transform: translateX(-120%) skewX(-18deg);
+  animation: titleShine 6s ease 1.6s infinite;
+}
+/* Fonte especial para BELZ */
+.brand-belz { font-family: 'Press Start 2P', 'Game Over', monospace; display:inline-block; padding-left:14px; font-size: 0.85em; letter-spacing:4px; background: linear-gradient(90deg,#3ad4ff,#0456b1 55%,#011147 90%); -webkit-background-clip:text; background-clip:text; color:transparent; text-shadow:0 2px 4px rgba(0,0,0,.35); position:relative; }
+.brand-belz::after { content:""; position:absolute; left:0; bottom:4px; height:4px; width:100%; background: linear-gradient(90deg,rgba(58,212,255,.6),rgba(4,86,177,.2)); filter: blur(2px); border-radius:4px; opacity:.7; }
+@keyframes glowSoft { 0%,100% { text-shadow:0 2px 6px rgba(0,0,0,.35), 0 0 6px rgba(58,212,255,.25);} 50% { text-shadow:0 2px 8px rgba(0,0,0,.4),0 0 12px rgba(58,212,255,.33);} }
+@keyframes gradientMove { 0%,100% { background-position:0% 50%; } 50% { background-position:100% 50%; } }
+@keyframes titleReveal { 
+   0% { opacity:0; transform:translateY(40px) scale(.92); letter-spacing:-4px; filter:blur(4px); }
+   55% { opacity:1; transform:translateY(0) scale(1.01); letter-spacing:1px; filter:blur(0); }
+   100% { opacity:1; transform:translateY(0) scale(1); letter-spacing:2px; }
+}
+@keyframes titleGlow {
+   0%,100% { text-shadow: 0 4px 18px rgba(0,0,0,.6), 0 0 8px rgba(255,255,255,.15), 0 0 22px rgba(0,180,255,.35); }
+   50% { text-shadow: 0 4px 18px rgba(0,0,0,.6), 0 0 18px rgba(255,255,255,.5), 0 0 36px rgba(0,180,255,.55); }
+}
+@keyframes titleShine {
+   0% { transform:translateX(-120%) skewX(-18deg); opacity:.0; }
+   15% { opacity:.9; }
+   55% { transform:translateX(125%) skewX(-18deg); opacity:0; }
+   100% { transform:translateX(125%) skewX(-18deg); opacity:0; }
+}
+.tagline { margin:0; font-size: clamp(16px,2.2vmin,28px); color:#d7f4ff; letter-spacing:.5px; font-weight:500; }
+.options-row { width:100%; display:flex; flex-wrap:wrap; justify-content:center; gap: clamp(18px,2.2vw,40px); }
+.field { display:flex; flex-direction:column; gap:8px; min-width:180px; }
+.field label { font-size:18px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:#8fdcff; }
+select#difficulty-select { background:#021d38; color:#fff; border:1px solid #064d7a; padding:12px 16px; border-radius:14px; font-size:16px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.05); outline:none; transition:.3s; }
+select#difficulty-select:focus { border-color: var(--primary-accent); box-shadow: 0 0 0 3px rgba(0,180,255,.3); }
+.checkbox-label { display:flex; align-items:center; gap:8px; cursor:pointer; font-size:14px; }
+.checkbox-label input[type=checkbox] { width:20px; height:20px; accent-color: var(--primary-accent); }
+.buttons { display:flex; gap: clamp(16px,2vw,32px); flex-wrap:wrap; justify-content:center; }
+/* Espaço extra entre a área de dificuldade e o botão Jogar */
+.start-panel .buttons { margin-top:20px; }
+#howto-toggle { display:none !important; }
+.howto-inline { font-size: clamp(16px,2.4vmin,24px); color:#cfefff; max-width:760px; margin:70px 0 0; line-height:1.45; }
+/* Removed old howto styles */
+/* .howto { background:rgba(0,0,0,.35); border:1px solid rgba(255,255,255,.08); padding:18px 26px 8px; border-radius:22px; max-width:780px; width:100%; animation: fadeIn .5s both; } */
+/* .howto ul { list-style:disc; text-align:left; margin:0 0 10px 20px; padding:0; display:grid; gap:10px; } */
+/* .howto li { font-size: clamp(14px,1.9vmin,20px); line-height:1.35; color:#e6f9ff; } */
 #start-screen::before { 
    /* Camada preenchimento sem blur */
    content:""; position:absolute; inset:0; z-index:0;
@@ -87,7 +209,21 @@ body.game-mode #game-board { margin-left:auto; margin-right:auto; max-width: min
    box-shadow: 0 4px 16px -4px rgba(0,0,0,.55), 0 0 0 2px rgba(255,255,255,.06) inset;
    backdrop-filter:none;
    -webkit-backdrop-filter:none;
+   font-size: clamp(22px, 3.2vh, 40px);
+   padding: clamp(22px,2.4em,38px) clamp(70px,9vw,140px);
+   min-width: clamp(260px,42vmin,520px);
+   letter-spacing:1px;
 }
+#start-screen .blob-btn { position:relative; overflow:hidden; isolation:isolate; }
+#start-screen .blob-btn .label { position:relative; z-index:5; }
+#start-screen .blob-btn .blob { position:absolute; width:180px; height:180px; background: radial-gradient(circle at 30% 30%, rgba(0,180,255,.55), rgba(0,40,90,.9)); top:50%; left:50%; border-radius:40% 60% 55% 45%/55% 40% 60% 45%; filter: blur(22px) saturate(140%); opacity:.55; transform: translate(-50%,-50%) scale(0); animation: blobFloat 18s linear infinite; mix-blend-mode:screen; }
+#start-screen .blob-btn .blob.b2 { animation-delay:-4.5s; width:210px; height:210px; opacity:.45; }
+#start-screen .blob-btn .blob.b3 { animation-delay:-9s; width:190px; height:190px; opacity:.50; }
+#start-screen .blob-btn .blob.b4 { animation-delay:-13.5s; width:170px; height:170px; opacity:.40; }
+#start-screen .blob-btn:hover .blob { opacity:.75; filter: blur(18px) saturate(160%); }
+#start-screen .blob-btn:active .blob { filter: blur(26px) saturate(130%); }
+@keyframes blobFloat { 0% { transform:translate(-50%,-50%) scale(0) rotate(0deg); } 10% { transform:translate(calc(-50% + 40px),calc(-50% - 20px)) scale(1) rotate(90deg);} 25% { transform:translate(calc(-50% - 10px),calc(-50% + 30px)) scale(.95) rotate(180deg);} 40% { transform:translate(calc(-50% + 50px),calc(-50% + 10px)) scale(1.05) rotate(270deg);} 55% { transform:translate(calc(-50% - 30px),calc(-50% - 30px)) scale(.9) rotate(360deg);} 70% { transform:translate(calc(-50% + 10px),calc(-50% + 40px)) scale(1.02) rotate(450deg);} 85% { transform:translate(calc(-50% - 20px),calc(-50% + 10px)) scale(.97) rotate(540deg);} 100% { transform:translate(-50%,-50%) scale(0) rotate(630deg);} }
+#howto-toggle { font-size: clamp(16px,2vh,22px) !important; padding: 16px 34px !important; min-width:auto !important; }
 #start-screen .btn:hover { background:#03206a; }
 #start-screen .btn:active { background:#021542; }
 #start-screen .logo { filter: drop-shadow(0 8px 24px rgba(0,0,0,.7)); }
@@ -95,12 +231,11 @@ body.game-mode #game-board { margin-left:auto; margin-right:auto; max-width: min
 
 /* Tela de jogo com background semelhante */
 #game-screen { position:relative; overflow:hidden; align-items:center; }
-#game-screen .stage { position:relative; width:1920px; height:1080px; max-width:100%; max-height:100%; transform-origin: top left; }
-#game-screen .stage-content { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; }
-body.game-mode #game-screen { display:flex; justify-content:center; align-items:center; }
+#game-screen .stage { position:relative; width:100vw; height:100dvh; background: var(--game-bg) center/cover no-repeat; display:flex; flex-direction:column; align-items:center; }
+#game-screen .stage-content { position:relative; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; }
+body.game-mode #game-screen { display:flex; justify-content:flex-start; align-items:flex-start; }
 #game-screen::before, #game-screen::after { display:none !important; }
 #game-screen > * { position:relative; z-index:1; }
-#game-screen .stage { background: var(--game-bg) center/cover no-repeat; }
 
 @keyframes fadeIn { from { opacity:0; transform: translateY(10px);} to { opacity:1; transform: none; } }
 @keyframes fadeOut { from { opacity:1; } to { opacity:0; } }
@@ -128,10 +263,28 @@ body.game-mode #game-screen { display:flex; justify-content:center; align-items:
 /* ==========================
    TOP BAR
    ========================== */
-.top-bar { width:100%; max-width:1000px; display:flex; justify-content:space-between; align-items:center; margin:0 auto 26px; background: var(--bg-panel); backdrop-filter: blur(12px); padding:14px 22px; border-radius: 16px; box-shadow: var(--shadow); position:sticky; top: calc(env(safe-area-inset-top, 0px) + 8px); z-index:15; }
-.timer-wrapper { display:flex; align-items:center; gap:10px; font-size: clamp(20px, 3.5vh, 40px); font-weight:600; }
+.top-bar { 
+   width:100%; max-width:1000px; display:flex; justify-content:space-between; align-items:center; margin:0 auto 26px; 
+   background: linear-gradient(135deg, rgba(1,17,71,.94) 0%, rgba(3,48,106,.9) 55%, rgba(4,86,177,.88) 100%);
+   backdrop-filter: blur(4px) saturate(140%);
+   -webkit-backdrop-filter: blur(4px) saturate(140%);
+   padding:14px 26px; border-radius: 20px; 
+   box-shadow: 0 4px 10px -2px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.06), 0 0 0 3px rgba(0,180,255,.12);
+   position:sticky; top: calc(env(safe-area-inset-top, 0px) + 8px); z-index:15; 
+   border:1px solid rgba(58,212,255,.35);
+}
+.top-bar * { text-shadow: 0 2px 4px rgba(0,0,0,.55), 0 0 6px rgba(0,0,0,.55); }
+.timer-wrapper { display:flex; align-items:center; gap:12px; font-size: clamp(22px, 3.6vh, 44px); font-weight:700; letter-spacing:.5px; }
 .timer-text { font-variant-numeric: tabular-nums; }
-.status { font-size: clamp(16px,2vh,24px); font-weight:500; letter-spacing:.5px; color: var(--primary-accent); }
+.status { font-size: clamp(18px,2.2vh,26px); font-weight:600; letter-spacing:.6px; color: var(--primary-accent); filter: drop-shadow(0 0 4px rgba(0,180,255,.45)); }
+/* Botão encerrar jogo */
+.end-game-btn { background:#3a0f0f; color:#fff; border:1px solid #ff4d4d; padding:10px 22px; border-radius:40px; cursor:pointer; font-size:14px; font-weight:600; letter-spacing:.5px; box-shadow:0 2px 8px -2px rgba(0,0,0,.5); transition:.3s; }
+.end-game-btn:hover { background:#561818; }
+.end-game-btn:active { background:#2d0a0a; transform:translateY(1px); }
+
+/* Modo alto contraste opcional (adicione classe .hc ao body se quiser) */
+body.hc .top-bar { background: #011147 !important; box-shadow: 0 0 0 2px #3ad4ff, 0 4px 16px -4px rgba(0,0,0,.7); }
+body.hc .top-bar * { text-shadow:none; }
 
 /* Barra de tempo visual */
 #time-bar-container { position:absolute; top:0; left:0; width:100%; height:8px; background:rgba(255,255,255,.08); }
@@ -152,15 +305,19 @@ body.game-mode #game-screen { display:flex; justify-content:center; align-items:
 .card.flipped .card-inner, .card.matched .card-inner { transform: rotateY(180deg); }
 
 .card-face { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:600; font-size: clamp(20px,2.5vh,34px); border-radius: inherit; backface-visibility:hidden; -webkit-backface-visibility:hidden; overflow:hidden; }
-.card-front { 
-   background:
-      radial-gradient(circle at 35% 30%, rgba(255,255,255,.12), rgba(255,255,255,0) 65%),
-      var(--card-front-logo) center/var(--card-front-logo-size) no-repeat,
-      linear-gradient(145deg,#082541,#0f3f66 60%,#0a2d4b);
-   border:2px solid #124d77; 
-   position:relative; 
-   filter: drop-shadow(0 2px 4px rgba(0,0,0,.5));
+.card-front {
+   background:#0b1e36;
+   border:2px solid var(--brand-accent2);
+   position:relative;
+   filter: drop-shadow(0 4px 10px rgba(0,0,0,.55));
+   box-shadow: 0 0 0 1px rgba(255,255,255,.05) inset, 0 8px 18px -6px rgba(0,0,0,.6);
+   opacity:1;
+   transition: transform .35s ease, box-shadow .35s ease;
 }
+.card-front img.front-logo { width:100%; height:100%; object-fit:cover; display:block; }
+.card-front::before, .card-front::after { display:none !important; }
+.card:hover .card-front, .card:focus-visible .card-front { opacity:1; box-shadow: 0 0 0 1px rgba(255,255,255,.07) inset, 0 0 0 3px rgba(0,180,255,.25), 0 10px 22px -6px rgba(0,0,0,.7); }
+.card:active .card-front { transform: translateY(2px); }
 /* Opcional: ponto de interrogação sobre a logo
 .card-front::after { content:"?"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size: clamp(38px,6vmin,70px); color: var(--primary-accent); text-shadow:0 0 14px rgba(0,180,255,.6); mix-blend-mode:screen; }
 */
@@ -177,6 +334,18 @@ body.game-mode #game-screen { display:flex; justify-content:center; align-items:
    END SCREEN
    ========================== */
 .end-box { background: var(--bg-panel); backdrop-filter: blur(18px); padding: clamp(28px,4vw,60px); border-radius: 30px; box-shadow: var(--shadow); max-width: 680px; animation: fadeIn .6s both; }
+.end-box { text-align:center; }
+/* Garantir centralização coerente de textos do painel inicial (caso alguma herança tenha sido quebrada) */
+#start-screen .start-panel h1,
+#start-screen .start-panel .tagline,
+#start-screen .start-panel .howto-inline,
+#start-screen .start-panel .field,
+#start-screen .start-panel .buttons { text-align:center; }
+/* Ajuste fino dos labels para alinhamento central sem quebrar layout responsivo */
+#start-screen .start-panel .field label { display:block; width:100%; }
+.end-box, .end-box * { font-family:'Press Start 2P','Game Over',monospace !important; letter-spacing:1px; }
+.end-box .end-message { letter-spacing:2px; }
+.end-box .stats { letter-spacing:1.5px; line-height:1.6; }
 .end-message { font-size: clamp(28px,4vh,48px); margin:0 0 20px; font-weight:600; }
 .stats { font-size: clamp(16px,2.2vh,24px); margin-bottom:26px; color: #e2f7ff; }
 
