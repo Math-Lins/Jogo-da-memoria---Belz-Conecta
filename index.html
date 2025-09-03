@@ -41,7 +41,14 @@
             <span class="label">Jogar</span>
           </button>
         </div>
-        <p class="howto-inline">Vire duas cartas para formar pares. Complete todos antes do tempo acabar. A dificuldade ajusta o tamanho do tabuleiro.</p>
+        <div class="howto-inline" role="group" aria-label="Instruções do jogo">
+          <ul class="howto-list compact">
+            <li>1. Escolha dificuldade</li>
+            <li>2. Vire 2 cartas</li>
+            <li>3. Forme pares</li>
+            <li>4. Antes do tempo!</li>
+          </ul>
+        </div>
       </div>
     </section>
 
@@ -62,13 +69,23 @@
       </div>
     </section>
 
-    <!-- Tela final -->
-    <section id="end-screen" class="screen" aria-labelledby="end-message">
-      <div class="end-box slide-up">
+  <!-- Tela final -->
+  <section id="end-screen" class="screen" aria-labelledby="end-message">
+  <div class="end-box slide-up">
         <h2 id="end-message" class="end-message"></h2>
         <div class="stats" id="final-stats"></div>
         <button id="restart-btn" class="btn secondary" aria-label="Jogar novamente">Jogar Novamente</button>
-  <button id="home-btn" class="btn primary" style="margin-top:18px" aria-label="Voltar à tela inicial">Voltar à Tela Inicial</button>
+        <button id="home-btn" class="btn primary pulse blob-btn" style="margin-top:18px" aria-label="Voltar à tela inicial">
+          <span class="blob b1"></span>
+          <span class="blob b2"></span>
+          <span class="blob b3"></span>
+          <span class="blob b4"></span>
+          <span class="label">Voltar à Tela Inicial</span>
+        </button>
+      </div>
+      <div class="end-frame-wrapper" aria-hidden="true">
+        <p class="end-frame-msg">Escaneie o QR Code abaixo. Poste sua conquista e nos marque!</p>
+        <img src="img/frame.png" alt="" class="end-frame" />
       </div>
     </section>
   </main>

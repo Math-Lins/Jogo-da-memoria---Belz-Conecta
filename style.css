@@ -182,6 +182,15 @@ select#difficulty-select:focus { border-color: var(--primary-accent); box-shadow
 .start-panel .buttons { margin-top:20px; }
 #howto-toggle { display:none !important; }
 .howto-inline { font-size: clamp(16px,2.4vmin,24px); color:#cfefff; max-width:760px; margin:70px 0 0; line-height:1.45; }
+.howto-list { list-style: none; padding:0; margin:0; display:flex; flex-direction:column; gap:14px; }
+.howto-list li { position:relative; padding-left:42px; font-size: clamp(14px,2vmin,20px); letter-spacing:1px; }
+.howto-list.compact li { padding-left:38px; font-size: clamp(13px,1.9vmin,18px); }
+.howto-list.compact li::before { width:22px; height:22px; border-radius:6px; }
+.howto-list.compact li::after { left:6px; top:8px; width:10px; height:10px; border-width:2.5px; }
+/* Alinhamento à esquerda para versão compacta mesmo em contêiner centralizado */
+.howto-list.compact { text-align:left; align-items:flex-start; }
+.howto-list li::before { content:""; position:absolute; left:0; top:4px; width:26px; height:26px; background:linear-gradient(135deg,#0db4ff,#24ffe0); border-radius:8px; box-shadow:0 0 0 2px rgba(255,255,255,.12),0 4px 10px -2px rgba(0,0,0,.5); }
+.howto-list li::after { content:""; position:absolute; left:7px; top:10px; width:12px; height:12px; border:3px solid #041626; border-left:0; border-top:0; transform:rotate(45deg); }
 /* Removed old howto styles */
 /* .howto { background:rgba(0,0,0,.35); border:1px solid rgba(255,255,255,.08); padding:18px 26px 8px; border-radius:22px; max-width:780px; width:100%; animation: fadeIn .5s both; } */
 /* .howto ul { list-style:disc; text-align:left; margin:0 0 10px 20px; padding:0; display:grid; gap:10px; } */
@@ -200,6 +209,7 @@ select#difficulty-select:focus { border-color: var(--primary-accent); box-shadow
    background-color:#0a1f33; /* fallback */
    filter: brightness(1.15) contrast(1.05) saturate(1.08);
 }
+#end-screen { background: url('img/conecta.jpeg') center/cover no-repeat; background-color:#000; }
 #start-screen > * { position:relative; z-index:2; }
 #start-screen .btn { 
    background:#011147;
@@ -214,6 +224,9 @@ select#difficulty-select:focus { border-color: var(--primary-accent); box-shadow
    min-width: clamp(260px,42vmin,520px);
    letter-spacing:1px;
 }
+#home-btn { background: linear-gradient(135deg,#0081c7,#005b88); color:#fff; border:none; box-shadow: var(--shadow); }
+#home-btn:hover { filter: brightness(1.1); }
+#home-btn:active { transform: scale(.96); }
 #start-screen .blob-btn { position:relative; overflow:hidden; isolation:isolate; }
 #start-screen .blob-btn .label { position:relative; z-index:5; }
 #start-screen .blob-btn .blob { position:absolute; width:180px; height:180px; background: radial-gradient(circle at 30% 30%, rgba(0,180,255,.55), rgba(0,40,90,.9)); top:50%; left:50%; border-radius:40% 60% 55% 45%/55% 40% 60% 45%; filter: blur(22px) saturate(140%); opacity:.55; transform: translate(-50%,-50%) scale(0); animation: blobFloat 18s linear infinite; mix-blend-mode:screen; }
@@ -276,9 +289,11 @@ body.game-mode #game-screen { display:flex; justify-content:flex-start; align-it
 .top-bar * { text-shadow: 0 2px 4px rgba(0,0,0,.55), 0 0 6px rgba(0,0,0,.55); }
 .timer-wrapper { display:flex; align-items:center; gap:12px; font-size: clamp(22px, 3.6vh, 44px); font-weight:700; letter-spacing:.5px; }
 .timer-text { font-variant-numeric: tabular-nums; }
-.status { font-size: clamp(18px,2.2vh,26px); font-weight:600; letter-spacing:.6px; color: var(--primary-accent); filter: drop-shadow(0 0 4px rgba(0,180,255,.45)); }
+.status { font-size: clamp(22px,2.6vh,32px); font-weight:700; letter-spacing:1px; color: var(--primary-accent); filter: drop-shadow(0 0 6px rgba(0,180,255,.55)); text-shadow:0 0 6px rgba(0,200,255,.4), 0 0 14px rgba(0,140,255,.25); }
 /* Botão encerrar jogo */
-.end-game-btn { background:#3a0f0f; color:#fff; border:1px solid #ff4d4d; padding:10px 22px; border-radius:40px; cursor:pointer; font-size:14px; font-weight:600; letter-spacing:.5px; box-shadow:0 2px 8px -2px rgba(0,0,0,.5); transition:.3s; }
+.end-game-btn { background:#3a0f0f; color:#fff; border:1px solid #ff4d4d; padding:18px 46px; border-radius:54px; cursor:pointer; font-size:18px; font-weight:700; letter-spacing:1px; box-shadow:0 4px 14px -2px rgba(0,0,0,.55); transition:.28s; }
+.end-game-btn:hover { transform:translateY(-2px); }
+.end-game-btn:active { transform:translateY(1px) scale(.97); }
 .end-game-btn:hover { background:#561818; }
 .end-game-btn:active { background:#2d0a0a; transform:translateY(1px); }
 
@@ -347,6 +362,24 @@ body.hc .top-bar * { text-shadow:none; }
    ========================== */
 .end-box { background: var(--bg-panel); backdrop-filter: blur(18px); padding: clamp(28px,4vw,60px); border-radius: 30px; box-shadow: var(--shadow); max-width: 680px; animation: fadeIn .6s both; }
 .end-box { text-align:center; }
+.end-box { position:relative; }
+.end-box .end-title { font-size: clamp(34px,7vmin,78px); margin:0 0 28px; animation: titleReveal .8s cubic-bezier(.23,1.12,.52,1) .05s both, gradientMove 12s ease-in-out 1s infinite, glowSoft 7s ease-in-out 1.2s infinite; }
+/* Título final removido (.end-title-top) */
+/* Frame final fixado no canto da página (viewport) */
+/* Imagem final fixa */
+.end-frame { position:fixed; left:16px; bottom:16px; width:180px; height:auto; opacity:.95; pointer-events:none; filter: drop-shadow(0 6px 12px rgba(0,0,0,.55)); z-index:120; border:2px solid #ff234d; border-radius:10px; box-shadow:0 0 6px #ff234d,0 0 14px #ff234d,0 0 28px rgba(255,35,77,.65),0 0 44px rgba(255,35,77,.4); animation: neonPulse 3.6s ease-in-out infinite, floatQR 8s ease-in-out infinite; }
+/* Wrapper e mensagem do QR na tela final */
+.end-frame-wrapper { position:fixed; left:16px; bottom:216px; z-index:119; display:flex; flex-direction:column; align-items:flex-start; gap:10px; max-width:300px; pointer-events:none; }
+.end-frame-msg { margin:0; font-family:'Press Start 2P', monospace; font-size:14px; line-height:1.35; color:#fff; text-shadow:0 0 6px rgba(0,0,0,.7); background:rgba(0,0,0,.38); padding:10px 12px 8px; border:1px solid rgba(255,255,255,.18); border-radius:10px; box-shadow:0 4px 14px -4px rgba(0,0,0,.65); }
+@media (max-width:900px) { .end-frame-wrapper { left:10px; bottom:200px; max-width:260px; } .end-frame-msg { font-size:13px; } }
+@media (max-width:600px) { .end-frame-wrapper { left:8px; bottom:190px; max-width:220px; } .end-frame-msg { font-size:12px; } }
+@media (max-width:900px) { .end-frame { width:150px; left:10px; bottom:10px; } }
+@media (max-width:600px) { .end-frame { width:130px; left:8px; bottom:8px; } }
+@keyframes neonPulse { 0%,100%{ box-shadow:0 0 4px #ff234d,0 0 10px #ff234d,0 0 20px rgba(255,35,77,.55),0 0 34px rgba(255,35,77,.35);} 50%{ box-shadow:0 0 8px #ff3d60,0 0 18px #ff3d60,0 0 36px rgba(255,61,96,.75),0 0 56px rgba(255,61,96,.45);} }
+@keyframes floatQR { 0%,100% { transform: translateY(0) rotate(0deg); } 25% { transform: translateY(-6px) rotate(-1deg); } 50% { transform: translateY(-2px) rotate(1deg); } 75% { transform: translateY(-8px) rotate(-0.8deg); } }
+/* Mostrar QR apenas na tela final */
+@media (max-width:900px) { .end-frame { width:140px; left:10px; bottom:10px; } }
+@media (max-width:600px) { .end-frame { width:110px; left:8px; bottom:8px; } }
 /* Garantir centralização coerente de textos do painel inicial (caso alguma herança tenha sido quebrada) */
 #start-screen .start-panel h1,
 #start-screen .start-panel .tagline,
