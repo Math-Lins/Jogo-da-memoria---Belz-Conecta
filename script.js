@@ -149,6 +149,14 @@ function criarCarta(idImagem, idxGlobal) {
   carta.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); virarCarta(carta);} 
   });
+  // Interações táteis/visuais
+  carta.addEventListener('pointerdown', () => {
+    if (!carta.classList.contains('flipped') && !carta.classList.contains('matched')) {
+      carta.classList.add('pressing');
+    }
+  });
+  carta.addEventListener('pointerup', () => carta.classList.remove('pressing'));
+  carta.addEventListener('pointerleave', () => carta.classList.remove('pressing'));
   return carta;
 }
 

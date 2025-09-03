@@ -318,6 +318,18 @@ body.hc .top-bar * { text-shadow:none; }
 .card-front::before, .card-front::after { display:none !important; }
 .card:hover .card-front, .card:focus-visible .card-front { opacity:1; box-shadow: 0 0 0 1px rgba(255,255,255,.07) inset, 0 0 0 3px rgba(0,180,255,.25), 0 10px 22px -6px rgba(0,0,0,.7); }
 .card:active .card-front { transform: translateY(2px); }
+/* Animações de interação (hover e toque) */
+.card:not(.flipped):hover .card-inner {
+   transform: translateY(-6px) scale(1.04);
+   box-shadow: 0 14px 26px -8px rgba(0,0,0,.65),0 0 0 2px rgba(0,180,255,.35);
+}
+.card.pressing .card-inner {
+   transform: scale(.94) !important;
+   box-shadow: 0 6px 14px -4px rgba(0,0,0,.6),0 0 0 2px rgba(0,180,255,.3);
+}
+.card.matched .card-inner {
+   box-shadow: 0 0 0 2px rgba(0,255,170,.6),0 10px 22px -8px rgba(0,0,0,.55);
+}
 /* Opcional: ponto de interrogação sobre a logo
 .card-front::after { content:"?"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size: clamp(38px,6vmin,70px); color: var(--primary-accent); text-shadow:0 0 14px rgba(0,180,255,.6); mix-blend-mode:screen; }
 */
