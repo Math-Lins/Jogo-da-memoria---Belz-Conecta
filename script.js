@@ -14,6 +14,7 @@ const timerElement = document.getElementById('timer');
 const endMessage = document.getElementById('end-message');
 const startBtn = document.getElementById('start-btn');
 const restartBtn = document.getElementById('restart-btn');
+const homeBtn = document.getElementById('home-btn');
 const pairsStatus = document.getElementById('pairs-status');
 const finalStats = document.getElementById('final-stats');
 const overlay = document.getElementById('transition-overlay');
@@ -28,10 +29,13 @@ const CONFIG = {
   linhas: 3,             // referência
   embaralharSeed: null,  // reservado para futura seed
   caminhoImagens: 'img/',
-  // 6 imagens únicas => 6 pares => 12 cartas
+  // 6 imagens únicas => 6 pares => 12 cartas (cada nome gera 2 cartas)
   imagens: [
     'img1.png','img2.png','img3.png','img4.png','img5.png','img6.png'
-  ]
+  ],
+  // Configurações de aparência:
+  usarVersoUnico: false,          // true = todos os versos iguais (usa imagem abaixo)
+  imagemVersoUnico: 'img2.png'     // usada se usarVersoUnico = true
 };
 
 // Vetor expandido (pares) será construído dinamicamente.
@@ -84,10 +88,12 @@ function criarCarta(idImagem, idxGlobal) {
   carta.tabIndex = 0;
   carta.dataset.img = idImagem;
   carta.dataset.index = idxGlobal;
+  // Define qual imagem irá no verso (face revelada)
+  const imgVerso = CONFIG.usarVersoUnico ? CONFIG.imagemVersoUnico : idImagem;
   carta.innerHTML = `
     <div class="card-inner">
       <div class="card-face card-front"></div>
-  <div class="card-face card-back"><img src="${CONFIG.caminhoImagens + idImagem}" alt="Imagem corporativa" draggable="false" onerror="this.dataset.err=1;this.style.opacity=.1;this.parentElement.style.background='linear-gradient(145deg,#082541,#0f3f66)';this.parentElement.style.display='flex';this.parentElement.style.alignItems='center';this.parentElement.style.justifyContent='center';this.parentElement.style.fontWeight='600';this.parentElement.style.letterSpacing='1px';this.parentElement.style.color='#3ad4ff';this.parentElement.textContent='IMG';" /></div>
+      <div class="card-face card-back"><img src="${CONFIG.caminhoImagens + imgVerso}" alt="Imagem corporativa" draggable="false" onerror="this.dataset.err=1;this.style.opacity=.1;this.parentElement.style.background='linear-gradient(145deg,#082541,#0f3f66)';this.parentElement.style.display='flex';this.parentElement.style.alignItems='center';this.parentElement.style.justifyContent='center';this.parentElement.style.fontWeight='600';this.parentElement.style.letterSpacing='1px';this.parentElement.style.color='#3ad4ff';this.parentElement.textContent='IMG';" /></div>
     </div>
   `;
   carta.addEventListener('click', () => virarCarta(carta));
@@ -228,11 +234,25 @@ function encerrarJogo(venceu) {
 function mostrarTela(target) {
   [startScreen, gameScreen, endScreen].forEach(sc => sc.classList.remove('active'));
   target.classList.add('active');
+  // Ajusta modo de layout para tela de jogo ocupar 1920x1080 quando possível
+  if (target === gameScreen) {
+    document.body.classList.add('game-mode');
+  ajustarEscalaStage();
+  } else {
+    document.body.classList.remove('game-mode');
+  }
 }
 
 // ---- Eventos ----
 startBtn.addEventListener('click', iniciarJogo);
 restartBtn.addEventListener('click', iniciarJogo);
+homeBtn && homeBtn.addEventListener('click', () => {
+  clearInterval(intervaloTempo);
+  mostrarTela(startScreen);
+  // limpa tabuleiro para evitar flashes quando voltar a jogar
+  gameBoard.innerHTML = '';
+  timerElement.textContent = 'Tempo: ' + formatarSegundos(CONFIG.tempoTotal);
+});
 
 // Permite reiniciar automaticamente após inatividade na tela final (kiosk opcional)
 let idleTimeout = null;
@@ -299,3 +319,25 @@ function scrollTopoSeguro() {
 }
 startBtn.addEventListener('click', scrollTopoSeguro);
 restartBtn.addEventListener('click', scrollTopoSeguro);
+
+// Escala fixa removida; layout agora é fluido.
+// Escala do "palco" 1920x1080 (restaurada)
+function ajustarEscalaStage() {
+  const stage = document.querySelector('#game-screen .stage');
+  if (!stage) return;
+  const BASE_W = 1920;
+  const BASE_H = 1080;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  // Usa MAX para preencher toda a tela (sem barras), cortando excedente se necessário
+  const escala = Math.max(vw / BASE_W, vh / BASE_H);
+  stage.style.transform = `translate(-50%, -50%) scale(${escala})`;
+  stage.style.position = 'absolute';
+  stage.style.top = '50%';
+  stage.style.left = '50%';
+  stage.style.width = BASE_W + 'px';
+  stage.style.height = BASE_H + 'px';
+  stage.style.overflow = 'hidden';
+}
+window.addEventListener('load', ajustarEscalaStage);
+window.addEventListener('resize', ajustarEscalaStage);

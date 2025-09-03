@@ -7,29 +7,30 @@
   <title>Jogo da Memória - Belz Conecta</title>
   <link rel="preload" href="style.css" as="style" />
   <link rel="stylesheet" href="style.css" />
-  <link rel="icon" href="logo.png" />
+  <link rel="icon" href="img/img2.png" />
 </head>
 <body>
   <main id="app">
     <!-- Tela inicial -->
-    <section id="start-screen" class="screen active" aria-labelledby="titulo-inicial">
-      <div class="logo-wrapper fade-in">
-        <img src="logo.png" alt="Logo da Empresa" class="logo" draggable="false" />
-      </div>
+  <section id="start-screen" class="screen active" aria-labelledby="titulo-inicial">
       <h1 id="titulo-inicial" class="visually-hidden">Jogo da Memória Belz Conecta</h1>
       <button id="start-btn" class="btn primary pulse" aria-label="Iniciar jogo">Jogar</button>
     </section>
 
     <!-- Tela do jogo -->
     <section id="game-screen" class="screen" aria-live="polite" aria-label="Área do jogo">
-      <header class="top-bar">
-        <div class="timer-wrapper" aria-label="Cronômetro">
-          <span class="icon" aria-hidden="true">⏱️</span>
-          <span id="timer" class="timer-text">Tempo: 60</span>
+      <div class="stage">
+        <div class="stage-content">
+          <header class="top-bar">
+            <div class="timer-wrapper" aria-label="Cronômetro">
+              <span class="icon" aria-hidden="true">⏱️</span>
+              <span id="timer" class="timer-text">Tempo: 60</span>
+            </div>
+            <div class="status" id="pairs-status" aria-label="Pares encontrados"></div>
+          </header>
+          <div id="game-board" class="game-board" role="grid" aria-label="Cartas do jogo"></div>
         </div>
-        <div class="status" id="pairs-status" aria-label="Pares encontrados"></div>
-      </header>
-      <div id="game-board" class="game-board" role="grid" aria-label="Cartas do jogo"></div>
+      </div>
     </section>
 
     <!-- Tela final -->
@@ -38,6 +39,7 @@
         <h2 id="end-message" class="end-message"></h2>
         <div class="stats" id="final-stats"></div>
         <button id="restart-btn" class="btn secondary" aria-label="Jogar novamente">Jogar Novamente</button>
+  <button id="home-btn" class="btn primary" style="margin-top:18px" aria-label="Voltar à tela inicial">Voltar à Tela Inicial</button>
       </div>
     </section>
   </main>

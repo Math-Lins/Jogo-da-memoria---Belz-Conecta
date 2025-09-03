@@ -22,6 +22,16 @@ body {
   --radius: 18px;
   --transition: 0.4s cubic-bezier(.4,.14,.3,1);
   --shadow: 0 4px 12px -2px rgba(0,0,0,.4),0 8px 32px -6px rgba(0,0,0,.6);
+   /* Logo na frente das cartas (ajuste o caminho/porcentagem conforme necessário) */
+   --card-front-logo: url('img/img2.png');
+   --card-front-logo-size: 60%;
+   /* Imagem de fundo da tela inicial (substitua o arquivo conforme sua necessidade) */
+         --start-bg: url('img/background1.png');
+         /* Ajuste para 'contain' apenas se aceitar barras laterais */
+            --start-bg-fit: cover; /* igual para ambas as telas */
+         /* Fundo da tela de jogo */
+         --game-bg: url('img/background2.png');
+         --game-bg-fit: cover; /* padrão agora: preencher tela 16:9 */
 }
 
 body, button { font-size: clamp(16px, 2.1vh, 22px); }
@@ -29,6 +39,12 @@ body, button { font-size: clamp(16px, 2.1vh, 22px); }
 .visually-hidden{position:absolute!important;left:-9999px!important;top:auto!important;width:1px!important;height:1px!important;overflow:hidden!important;}
 
 main#app { width:100%; max-width:1400px; height:100%; display:flex; align-items:center; justify-content:center; position:relative; }
+/* Modo jogo tela cheia */
+body.game-mode main#app { max-width:none; width:100vw; height:100dvh; }
+body.game-mode { align-items:stretch; }
+body.game-mode #game-screen { min-height:100dvh; width:100%; display:flex; flex-direction:column; }
+body.game-mode .top-bar { max-width: min(1800px, 92vw); }
+body.game-mode #game-board { margin-left:auto; margin-right:auto; max-width: min(1600px, 90vw); }
 
 /* ==========================
    SCREENS & TRANSITIONS
@@ -36,6 +52,55 @@ main#app { width:100%; max-width:1400px; height:100%; display:flex; align-items:
 .screen { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; padding: clamp(16px, 4vw, 60px); text-align:center; animation: fadeOut .5s both; }
 #game-screen { justify-content:flex-start; padding-top: clamp(70px, env(safe-area-inset-top, 0px) + 80px, 140px); }
 .screen.active { display:flex; animation: fadeIn .6s both; }
+
+/* Tela inicial com imagem de fundo */
+#start-screen { 
+   position:relative;
+   overflow:hidden;
+   min-height:100dvh; /* garante ocupação total */
+   width:100%;
+   display:flex;
+   flex-direction:column;
+   justify-content:center;
+   align-items:center;
+}
+#start-screen::before { 
+   /* Camada preenchimento sem blur */
+   content:""; position:absolute; inset:0; z-index:0;
+   background: var(--start-bg) center/cover no-repeat;
+   /* Se quiser escurecer ligeiramente: descomente abaixo */
+   /* filter: brightness(.8) saturate(1.05); */
+}
+#start-screen::after { 
+   /* Somente a imagem de fundo (sem gradiente) + leve ajuste de brilho */
+   content:""; position:absolute; inset:0; z-index:1;
+   background: var(--start-bg) center/var(--start-bg-fit) no-repeat;
+   background-color:#0a1f33; /* fallback */
+   filter: brightness(1.15) contrast(1.05) saturate(1.08);
+}
+#start-screen > * { position:relative; z-index:2; }
+#start-screen .btn { 
+   background:#011147;
+   background-image:none;
+   color:#fff;
+   border:1px solid #022366;
+   box-shadow: 0 4px 16px -4px rgba(0,0,0,.55), 0 0 0 2px rgba(255,255,255,.06) inset;
+   backdrop-filter:none;
+   -webkit-backdrop-filter:none;
+}
+#start-screen .btn:hover { background:#03206a; }
+#start-screen .btn:active { background:#021542; }
+#start-screen .logo { filter: drop-shadow(0 8px 24px rgba(0,0,0,.7)); }
+#start-screen .btn { box-shadow:0 6px 24px -4px rgba(0,0,0,.6); }
+
+/* Tela de jogo com background semelhante */
+#game-screen { position:relative; overflow:hidden; align-items:center; }
+#game-screen .stage { position:relative; width:1920px; height:1080px; max-width:100%; max-height:100%; transform-origin: top left; }
+#game-screen .stage-content { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; }
+body.game-mode #game-screen { display:flex; justify-content:center; align-items:center; }
+#game-screen::before, #game-screen::after { display:none !important; }
+#game-screen > * { position:relative; z-index:1; }
+#game-screen .stage { background: var(--game-bg) center/cover no-repeat; }
 
 @keyframes fadeIn { from { opacity:0; transform: translateY(10px);} to { opacity:1; transform: none; } }
 @keyframes fadeOut { from { opacity:1; } to { opacity:0; } }
@@ -75,8 +140,11 @@ main#app { width:100%; max-width:1400px; height:100%; display:flex; align-items:
 /* ==========================
    GAME BOARD & CARDS
    ========================== */
-.game-board { --cols:5; --rows:4; --card-ratio: 100/140; display:grid; grid-template-columns: repeat(var(--cols), minmax(0,1fr)); gap: clamp(8px,1.3vw,22px); width:100%; max-width:1100px; perspective:1600px; place-items:stretch; align-content:start; margin-top: clamp(10px, 2vh, 30px); }
-   .game-board { --cols:4; --rows:3; --card-ratio: 100/140; display:grid; grid-template-columns: repeat(var(--cols), minmax(0,1fr)); gap: clamp(8px,1.3vw,22px); width:100%; max-width:900px; perspective:1600px; place-items:stretch; align-content:start; margin-top: clamp(10px, 2vh, 30px); }
+.game-board { --cols:4; --rows:3; --card-ratio: 100/140; display:grid; grid-template-columns: repeat(var(--cols), 1fr); gap: clamp(12px,1.4vw,30px); width:100%; max-width: min(1500px, 88vw); perspective:1800px; place-items:stretch; align-content:center; justify-items:stretch; margin: clamp(12px, 2vh, 32px) auto 40px; }
+.game-board .card { height: auto; }
+@media (min-height:800px) {
+   .game-board { align-content:space-around; }
+}
 
 .card { position:relative; width:100%; aspect-ratio: 100 / 140; cursor:pointer; perspective: 1600px; border-radius: var(--radius); transform-style: preserve-3d; }
 .card-inner { position:absolute; inset:0; width:100%; height:100%; transition: transform var(--transition); transform-style: preserve-3d; border-radius: inherit; box-shadow: 0 8px 18px -6px rgba(0,0,0,.55),0 4px 8px -4px rgba(0,0,0,.45); }
@@ -84,9 +152,22 @@ main#app { width:100%; max-width:1400px; height:100%; display:flex; align-items:
 .card.flipped .card-inner, .card.matched .card-inner { transform: rotateY(180deg); }
 
 .card-face { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:600; font-size: clamp(20px,2.5vh,34px); border-radius: inherit; backface-visibility:hidden; -webkit-backface-visibility:hidden; overflow:hidden; }
-.card-front { background: linear-gradient(145deg,#082541,#0f3f66 60%,#0a2d4b); border:2px solid #124d77; position:relative; }
-.card-front::after { content:"?"; font-size: clamp(38px,6vmin,70px); color: var(--primary-accent); text-shadow:0 0 14px rgba(0,180,255,.6); }
+.card-front { 
+   background:
+      radial-gradient(circle at 35% 30%, rgba(255,255,255,.12), rgba(255,255,255,0) 65%),
+      var(--card-front-logo) center/var(--card-front-logo-size) no-repeat,
+      linear-gradient(145deg,#082541,#0f3f66 60%,#0a2d4b);
+   border:2px solid #124d77; 
+   position:relative; 
+   filter: drop-shadow(0 2px 4px rgba(0,0,0,.5));
+}
+/* Opcional: ponto de interrogação sobre a logo
+.card-front::after { content:"?"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size: clamp(38px,6vmin,70px); color: var(--primary-accent); text-shadow:0 0 14px rgba(0,180,255,.6); mix-blend-mode:screen; }
+*/
+/* Caso queira manter um ponto de interrogação, descomente abaixo */
+/* .card-front::after { content:"?"; font-size: clamp(38px,6vmin,70px); color: var(--primary-accent); text-shadow:0 0 14px rgba(0,180,255,.6); } */
 .card-back { transform: rotateY(180deg); background:#02121f; border:2px solid var(--primary-accent); }
+.card-back img { width:100%; height:100%; object-fit:cover; display:block; }
 .card-back img { width:100%; height:100%; object-fit:cover; display:block; }
 
 .card.matched .card-inner { animation: matchedPulse .9s ease; }
@@ -113,11 +194,28 @@ main#app { width:100%; max-width:1400px; height:100%; display:flex; align-items:
    RESPONSIVE
    ========================== */
 @media (max-width: 1000px) {
-   .game-board { max-width: 92vw; }
+   .game-board { max-width: 94vw; gap: clamp(10px,2vw,26px); }
 }
 @media (max-width: 680px) {
    .game-board { --cols:3; }
 }
+
+/* Telas muito estreitas: reduz margens e coloca background em cover único para evitar barras grandes */
+@media (max-width:520px) {
+   :root { --game-bg-fit: cover; }
+   #game-screen { padding-top: clamp(90px, env(safe-area-inset-top,0px) + 90px, 120px); }
+   .top-bar { backdrop-filter: blur(10px); }
+}
+
+/* Paisagem baixa (smartphones deitados) */
+@media (max-height:560px) and (orientation:landscape) {
+   :root { --game-bg-fit: cover; }
+   #game-screen { padding-top: clamp(60px, env(safe-area-inset-top,0px) + 60px, 90px); }
+   .game-board { gap: clamp(6px,0.9vw,14px); }
+   .card { aspect-ratio: 100 / 150; }
+}
+
+/* Sempre cover para evitar barras; se quiser preservar bordas, reintroduzir regra portrait. */
 
 
 @media (max-width: 560px) {
