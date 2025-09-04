@@ -1,5 +1,5 @@
 // Service Worker básico para modo totem/offline
-const CACHE_NAME = 'memoria-belz-v1';
+const CACHE_NAME = 'memoria-belz-v3';
 const ASSETS = [
   '/',
   'index.html',
@@ -14,7 +14,13 @@ const ASSETS = [
   'img/img3.png',
   'img/img4.png',
   'img/img5.png',
-  'img/img6.png'
+  'img/img6.png',
+  'img/img7.png',
+  'img/img8.png',
+  'img/img9.png',
+  'img/img10.png',
+  'img/conecta.jpeg',
+  'img/frame.png'
 ];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS)).then(()=>self.skipWaiting()));

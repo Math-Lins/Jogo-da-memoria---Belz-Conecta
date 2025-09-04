@@ -13,7 +13,8 @@ const gameBoard = document.getElementById('game-board');
 const timerElement = document.getElementById('timer');
 const endMessage = document.getElementById('end-message');
 const startBtn = document.getElementById('start-btn');
-const difficultySelect = document.getElementById('difficulty-select');
+// Dificuldade fixa (médio) - seletor removido
+const difficultySelect = null;
 const restartBtn = document.getElementById('restart-btn');
 const homeBtn = document.getElementById('home-btn');
 const endBtn = document.getElementById('end-btn');
@@ -31,11 +32,12 @@ const CONFIG = {
   linhas: 4,             // referência
   embaralharSeed: null,  // reservado para futura seed
   caminhoImagens: 'img/',
-  // Ainda só temos 6 arquivos físicos; vamos gerar placeholders para completar até 10 pares.
+  // Agora temos 10 arquivos físicos (10 pares para 20 cartas) – sem placeholders.
   imagens: [
-    'img1.png','img2.png','img3.png','img4.png','img5.png','img6.png'
+    'img1.png','img2.png','img3.png','img4.png','img5.png',
+    'img6.png','img7.png','img8.png','img9.png','img10.png'
   ],
-  gerarPlaceholders: true, // permite criar imagens sintéticas para pares extras
+  gerarPlaceholders: false, // não é mais necessário gerar imagens sintéticas
   // Configurações de aparência:
   usarVersoUnico: false,          // true = todos os versos iguais (usa imagem abaixo)
   imagemVersoUnico: 'img2.png'     // usada se usarVersoUnico = true
@@ -43,7 +45,6 @@ const CONFIG = {
 
 // Vetor expandido (pares) será construído dinamicamente.
 let deck = [];
-const PLACEHOLDER_CACHE = {}; // armazena dataURLs gerados
 
 // Estado de jogo
 let primeiro = null;      // {el, id}
@@ -92,39 +93,10 @@ function atualizarParesStatus() {
   pairsStatus.textContent = `${paresEncontrados}/${total} pares`;
 }
 
-function obterDataURLPlaceholder(chave) {
-  if (PLACEHOLDER_CACHE[chave]) return PLACEHOLDER_CACHE[chave];
-  const canvas = document.createElement('canvas');
-  canvas.width = 256; canvas.height = 256;
-  const ctx = canvas.getContext('2d');
-  const idx = parseInt(chave.replace('__auto',''),10) || 0;
-  const cores = ['#0b3c68','#145d99','#1e7fc8','#2696e8','#34b2ff','#0d2f4e'];
-  const c1 = cores[idx % cores.length];
-  const c2 = cores[(idx+2) % cores.length];
-  const grad = ctx.createLinearGradient(0,0,256,256);
-  grad.addColorStop(0,c1); grad.addColorStop(1,c2);
-  ctx.fillStyle = grad;
-  ctx.fillRect(0,0,256,256);
-  ctx.fillStyle = 'rgba(255,255,255,0.15)';
-  for (let i=0;i<8;i++) {
-    ctx.beginPath();
-    ctx.arc(Math.random()*256, Math.random()*256, 20+Math.random()*40, 0, Math.PI*2);
-    ctx.fill();
-  }
-  ctx.fillStyle = '#fff';
-  ctx.font = 'bold 120px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(String(idx+1),128,140);
-  const url = canvas.toDataURL('image/png');
-  PLACEHOLDER_CACHE[chave] = url;
-  return url;
-}
 
 function resolverSrcImagem(nome) {
   if (!nome) return '';
   if (nome.startsWith('data:image')) return nome;
-  if (nome.startsWith('__auto')) return obterDataURLPlaceholder(nome);
   return CONFIG.caminhoImagens + nome;
 }
 
@@ -197,12 +169,7 @@ function reiniciarEstado() {
 function construirDeck() {
   const paresNecessarios = (CONFIG.colunas * CONFIG.linhas) / 2;
   let base = [...CONFIG.imagens];
-  if (base.length < paresNecessarios && CONFIG.gerarPlaceholders) {
-    const faltam = paresNecessarios - base.length;
-    for (let i = 0; i < faltam; i++) {
-      base.push(`__auto${i}`);
-    }
-  }
+  // Sem geração de placeholders: assumimos que há imagens suficientes.
   base = base.slice(0, paresNecessarios); // garante tamanho exato
   deck = shuffle([...base, ...base]);
 }
@@ -324,26 +291,12 @@ endBtn && endBtn.addEventListener('click', () => {
 });
 
 
-// Dificuldades
-const MAPA_DIFICULDADE = {
-  facil:  { colunas:4, linhas:3, tempo:45 },
-  medio:  { colunas:5, linhas:4, tempo:60 },
-  dificil:{ colunas:6, linhas:5, tempo:90 }
-};
-
-function aplicarDificuldade() {
-  if (!difficultySelect) return;
-  const val = difficultySelect.value;
-  const def = MAPA_DIFICULDADE[val] || MAPA_DIFICULDADE.medio;
-  CONFIG.colunas = def.colunas;
-  CONFIG.linhas = def.linhas;
-  CONFIG.tempoTotal = def.tempo;
-  tempoRestante = CONFIG.tempoTotal;
-  timerElement.textContent = 'Tempo: ' + formatarSegundos(CONFIG.tempoTotal);
-}
-
-difficultySelect && difficultySelect.addEventListener('change', aplicarDificuldade);
-aplicarDificuldade();
+// Ajuste direto para dificuldade média fixa (tempo 60s)
+CONFIG.colunas = 5;
+CONFIG.linhas = 4;
+CONFIG.tempoTotal = 60;
+tempoRestante = CONFIG.tempoTotal;
+timerElement.textContent = 'Tempo: ' + formatarSegundos(CONFIG.tempoTotal);
 
 // Permite reiniciar automaticamente após inatividade na tela final (kiosk opcional)
 let idleTimeout = null;
@@ -384,7 +337,7 @@ function prepararImagens() {
   }
 
   return Promise.all(lista.map(tentarCarregar)).then(res => {
-    CONFIG.imagens = res.map(r => r.resultado || 'placeholder.png');
+  CONFIG.imagens = res.map(r => r.resultado || r.nomeOriginal);
   });
 }
 
@@ -456,7 +409,7 @@ function agendarResetGlobal() {
       clearInterval(intervaloTempo);
       mostrarTela(startScreen);
       gameBoard.innerHTML = '';
-      aplicarDificuldade();
+  // mantida dificuldade fixa
     }
   }, 5 * 60 * 1000); // 5 minutos
 }
