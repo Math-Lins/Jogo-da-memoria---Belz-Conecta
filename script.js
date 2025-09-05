@@ -182,6 +182,7 @@ function renderizarTabuleiro() {
     const el = criarCarta(img, i);
     gameBoard.appendChild(el);
   });
+  ajustarColunasResponsivo();
 }
 
 function iniciarCronometro() {
@@ -356,6 +357,66 @@ function aplicarViewportDinamica() {
 }
 aplicarViewportDinamica();
 window.addEventListener('resize', aplicarViewportDinamica);
+
+// -----------------------------
+// RESPONSIVIDADE DO TABULEIRO
+// Ajusta número de colunas para diferentes tamanhos / orientações
+// -----------------------------
+function ajustarColunasResponsivo() {
+  if (!gameBoard) return;
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const totalCartas = deck.length || (CONFIG.colunas * CONFIG.linhas);
+  let cols;
+  // Heurística simples baseada em largura principal
+  if (w < 380) cols = 3;          // telas ultra estreitas
+  else if (w < 520) cols = 4;     // smartphones pequenos
+  else if (w < 880) cols = 5;     // padrão médio
+  else if (w < 1200) cols = 5;    // tablets / paisagem moderada
+  else cols = 5;                  // grandes mantém 5 (layout original)
+
+  // Ajuste para paisagem muito baixa: reduzir colunas para ganhar altura de carta
+  if (h < 480 && w > h && cols > 4) cols = 4;
+
+  // Evita linhas exageradas: se muitas linhas ( > 6 ) em telas muito estreitas, força cols+1 se possível
+  let linhas = Math.ceil(totalCartas / cols);
+  if (w >= 360 && w < 420 && linhas > 6 && cols < 5) {
+    cols += 1;
+    linhas = Math.ceil(totalCartas / cols);
+  }
+
+  gameBoard.style.setProperty('--cols', cols);
+  // Opcional: ajustar aspect ratio quando poucas colunas para evitar cartas gigantes na vertical
+  if (cols <= 3) {
+    gameBoard.classList.add('cols-estreitas');
+  } else {
+    gameBoard.classList.remove('cols-estreitas');
+  }
+}
+
+window.addEventListener('resize', ajustarColunasResponsivo);
+window.addEventListener('orientationchange', () => setTimeout(ajustarColunasResponsivo, 120));
+
+// -----------------------------
+// ESCALA PERCENTUAL DOS PAINÉIS
+// Permite reduzir/aumentar proporções globalmente sem alterar clamps individuais
+// -----------------------------
+function aplicarEscalaPainelAuto() {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  let esc = 1;
+  // Regras heurísticas: ajusta para telas bem pequenas ou muito grandes
+  if (w < 360) esc = 0.85;
+  else if (w < 420) esc = 0.9;
+  else if (w < 520 && h < 700) esc = 0.92;
+  else if (w > 1900 && h > 900) esc = 1.06;
+  else if (w > 2400) esc = 1.12;
+  document.documentElement.style.setProperty('--panel-scale', esc);
+}
+window.addEventListener('resize', aplicarEscalaPainelAuto);
+window.addEventListener('orientationchange', () => setTimeout(aplicarEscalaPainelAuto, 80));
+aplicarEscalaPainelAuto();
+
 
 // Garante reposicionamento do topo ao iniciar jogo (evita ficar sob barra)
 function scrollTopoSeguro() {

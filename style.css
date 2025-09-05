@@ -15,6 +15,27 @@ body {
 :root {
   --primary: #00b4ff;
   --primary-accent: #3ad4ff;
+   /* Escala global dos painéis (pode ser alterada dinamicamente) */
+   --panel-scale: 1;
+#start-screen .scalable-panel, #end-screen .scalable-panel {
+   /* Aplicamos a escala apenas ao conteúdo visual mantendo fluxo original */
+   transform: scale(var(--panel-scale));
+   transform-origin: top center;
+   will-change: transform;
+}
+/* Classes utilitárias para ajuste manual (opcional) */
+body.scale-95 { --panel-scale: .95; }
+body.scale-90 { --panel-scale: .90; }
+body.scale-85 { --panel-scale: .85; }
+body.scale-80 { --panel-scale: .80; }
+body.scale-75 { --panel-scale: .75; }
+body.scale-110 { --panel-scale: 1.10; }
+body.scale-120 { --panel-scale: 1.20; }
+
+/* Em telas muito pequenas evitamos sombras exageradas após redução */
+@media (max-width:400px) {
+   #start-screen .scalable-panel, #end-screen .scalable-panel { filter: drop-shadow(0 4px 10px rgba(0,0,0,.55)); }
+}
    /* Cores da Belz (marca) */
    --brand: #011147;
    --brand-accent: #02306a;
@@ -441,9 +462,6 @@ body.hc .top-bar * { text-shadow:none; }
 @media (max-width: 1000px) {
    .game-board { max-width: 94vw; gap: clamp(10px,2vw,26px); }
 }
-@media (max-width: 680px) {
-   .game-board { --cols:3; }
-}
 
 /* Telas muito estreitas: reduz margens e coloca background em cover único para evitar barras grandes */
 @media (max-width:520px) {
@@ -464,7 +482,7 @@ body.hc .top-bar * { text-shadow:none; }
 
 
 @media (max-width: 560px) {
-   .game-board { --cols:3; gap: clamp(6px,1vw,14px); }
+   .game-board { gap: clamp(6px,1vw,14px); }
    .top-bar { flex-direction:column; gap:10px; }
 
 /* =====================================================
@@ -601,3 +619,114 @@ body.hc .top-bar * { text-shadow:none; }
 .loading-text { font-size: clamp(16px,2vh,22px); letter-spacing:.5px; color:#dff7ff; animation: pulseText 2.4s ease-in-out infinite; }
 @keyframes spin { to { transform: rotate(360deg);} }
 @keyframes pulseText { 0%,100%{ opacity:.45;} 50%{ opacity:1;} }
+
+/* ==========================
+    EXTRA RESPONSIVE PANELS
+    (Aprimora adaptação em qualquer dispositivo)
+    ========================== */
+/* Painel inicial em telas muito largas: limita crescimento e aumenta leve a tipografia */
+@media (min-width:1800px) and (min-height:900px) {
+   #start-screen .start-panel { width: clamp(640px, 54vw, 960px); gap: clamp(40px,4vh,70px); }
+   #start-screen .game-title { font-size: clamp(70px, 10vh, 140px); }
+   #start-screen .tagline { font-size: clamp(24px,2.4vh,46px); }
+}
+
+/* Painel inicial ultra estreito (ex: devices dobráveis estreitos) */
+@media (max-width:320px) {
+   #start-screen .start-panel { padding: 24px 16px 34px; gap: 24px; }
+   #start-screen .btn { font-size: clamp(18px,6.2vw,26px); }
+   #start-screen .howto-list.compact li { font-size: clamp(15px,5vw,20px); }
+}
+
+/* End-box ocupa largura total em telas pequenas para evitar overflow lateral */
+@media (max-width:760px) {
+   #end-screen .end-box { width:100%; max-width:100%; border-radius: 0 0 34px 34px; padding: clamp(34px,8vw,60px) clamp(20px,6vw,46px); box-shadow:0 6px 22px -6px rgba(0,0,0,.6); }
+   #end-screen .end-message { font-size: clamp(34px,10vw,64px); }
+   #end-screen .stats { font-size: clamp(18px,4.6vw,28px); }
+   #end-screen .end-box .btn { width:100%; min-width:0; }
+}
+
+/* End-box em paisagem baixa: reduz padding e fonte para caber sem scroll exagerado */
+@media (max-height:520px) and (orientation:landscape) {
+   #end-screen .end-box { padding: 28px 34px; gap:22px; }
+   #end-screen .end-message { font-size: clamp(30px,10vh,56px); margin-bottom:20px; }
+   #end-screen .stats { margin-bottom:24px; }
+   #end-screen .end-box .btn { padding: 16px 48px; font-size: clamp(18px,4.4vh,30px); }
+}
+
+/* Top-bar ultra estreita: empilha e reduz paddings mais cedo */
+@media (max-width:440px) {
+   .top-bar { flex-direction:column; align-items:flex-start; gap:8px; padding:10px 18px; }
+   .timer-wrapper { font-size: clamp(18px,6.8vw,30px); }
+   .status { font-size: clamp(16px,5.8vw,24px); }
+}
+
+/* Top-bar monitores grandes: aumento leve de tipografia para legibilidade em kiosks 4K */
+@media (min-width:2000px) and (min-height:1100px) {
+   .top-bar { max-width: min(1600px,84vw); padding:20px 40px; }
+   .timer-wrapper { font-size: clamp(30px,3.2vh,58px); }
+   .status { font-size: clamp(26px,2.6vh,46px); }
+}
+
+/* Ajuste de cartas quando JS define cols-estreitas */
+.game-board.cols-estreitas .card { aspect-ratio: 100 / 150; }
+.game-board.cols-estreitas { gap: clamp(6px,1.4vw,18px); }
+
+/* Quando número de colunas cai (ex <=3), ampliamos altura disponível centralizando melhor */
+@media (max-width:520px) {
+   .game-board.cols-estreitas { max-width:96vw; }
+}
+
+/* Segurança: se viewport extremamente pequena (altura < 420px), remove sombras pesadas para performance */
+@media (max-height:420px) {
+   .card-inner { box-shadow: 0 4px 10px -4px rgba(0,0,0,.55); }
+   #start-screen .btn, .end-box .btn { box-shadow: 0 4px 14px -6px rgba(0,0,0,.55); }
+}
+
+/* Preferência de redução de movimentos já tratada; complementamos removendo flutuação do QR em telas muito pequenas */
+@media (max-height:500px) and (orientation:landscape) {
+   .end-frame { animation: neonPulse 3.6s ease-in-out infinite !important; }
+}
+
+/* ==========================
+    START PANEL RESPONSIVE REFINEMENTS (NOVOS)
+    ========================== */
+/* Monitores largos: permitir painel maior para reduzir quebras de linha em fontes grandes */
+@media (min-width:1400px) and (min-aspect-ratio: 16/10) {
+   #start-screen .start-panel { width: clamp(760px, 54vw, 1180px); }
+   #start-screen .game-title { font-size: clamp(70px, 9.5vh, 150px); }
+   #start-screen .tagline { font-size: clamp(26px,2.2vh,48px); }
+   #start-screen .howto-list.compact li { font-size: clamp(20px,1.4vw,34px); }
+}
+/* Ultra wide muito amplo: evita crescer demais causando linhas muito longas */
+@media (min-width:2200px) {
+   #start-screen .start-panel { width: clamp(820px, 48vw, 1300px); }
+}
+/* Altura curta em portrait: comprime gaps e permite scroll interno seguro */
+@media (max-height: 620px) and (orientation: portrait) {
+   #start-screen .start-panel { gap: clamp(18px,4vh,30px); padding: clamp(20px,5vh,34px) clamp(18px,7vw,40px); overflow-y:auto; }
+   #start-screen .game-title { font-size: clamp(48px, 14vw, 90px); }
+   #start-screen .tagline { font-size: clamp(18px,4.4vw,28px); }
+}
+/* Altura muito baixa em landscape (celular deitado com barra visível) */
+@media (max-height:440px) and (orientation: landscape) {
+   #start-screen .start-panel { gap: clamp(14px,4vh,24px); padding: 20px clamp(28px,6vw,46px); }
+   #start-screen .game-title { font-size: clamp(42px, 18vh, 72px); }
+   #start-screen .howto-list.compact li { font-size: clamp(14px,3.6vh,20px); }
+}
+/* Telas muito estreitas: reduções para evitar overflow lateral */
+@media (max-width:480px) {
+   #start-screen .howto-list.compact li { padding-left:44px; font-size: clamp(16px,4.4vw,22px); }
+   #start-screen .howto-list.compact li::before { width:30px; height:30px; border-radius:8px; }
+   #start-screen .howto-list.compact li::after { left:7px; top:9px; width:12px; height:12px; border-width:3px; }
+}
+/* Ajuste extremo para <340px largura */
+@media (max-width:340px) {
+   #start-screen .game-title { font-size: clamp(38px, 20vw, 66px); }
+   #start-screen .tagline { font-size: clamp(16px,5.4vw,22px); }
+   #start-screen .btn { font-size: clamp(18px,6.2vw,26px); padding: 18px 30px; }
+}
+/* Refinamento: quando JS reduzir colunas e painel ainda estiver muito largo, limita a 96vw */
+@media (max-width:560px) {
+   #start-screen .start-panel { width:100%; max-width:96vw; }
+}
